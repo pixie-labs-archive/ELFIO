@@ -243,7 +243,10 @@ class section_impl : public section
 
 
         Elf_Xword size = get_size();
-        if ( 0 == data && SHT_NULL != get_type() && SHT_NOBITS != get_type() && size < get_stream_size()) {
+        // oazizi: Also skip loading SHT_PROGBITS data to save memory.
+        // SHT_PROGBITS "Identifies information defined by the program, whose format and meaning are determined solely by the program",
+        // It is used to store information like DWARF, which we don't access at the moment.
+        if ( 0 == data && SHT_NULL != get_type() && SHT_NOBITS != get_type() && SHT_PROGBITS != get_type() && size < get_stream_size()) {
             try {
                 data = new char[size + 1];
             } catch (const std::bad_alloc&) {
